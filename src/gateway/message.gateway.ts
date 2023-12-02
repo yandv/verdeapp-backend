@@ -2,7 +2,7 @@ import { WebSocketGateway, SubscribeMessage, WebSocketServer, OnGatewayConnectio
 import { Server, Socket } from "socket.io";
 import { MessageService } from "src/services/message.service";
 
-@WebSocketGateway({namespace: 'messages'})
+@WebSocketGateway({namespace: 'messages', cors: true})
 export class MessageGateway implements OnGatewayConnection {
 
     @WebSocketServer()

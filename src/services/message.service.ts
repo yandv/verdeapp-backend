@@ -10,6 +10,8 @@ function toString(socket: ConnectedSocket): string {
   return `${socket.socket.id} (${socket.userId})`;
 }
 
+var count = 0;
+
 @Injectable()
 export class MessageService {
   private readonly clients: Map<string, ConnectedSocket> = new Map();
@@ -24,7 +26,7 @@ export class MessageService {
       return;
     }
 
-    const connectedSocket = { socket, userId: 1 };
+    const connectedSocket = { socket, userId: count++ };
     this.clients.set(clientId, connectedSocket);
 
     console.log(`The client ${toString(connectedSocket)} has been connected successfully.`);
@@ -44,6 +46,7 @@ export class MessageService {
       return;
     }
 
-    socket.emit('message', message);
+    socket.broadcast.emit('message', { userId: connectedSocket.userId, message });
+    console.log(`The client ${toString(connectedSocket)} sent a message: ${message}`);
   }
 }
