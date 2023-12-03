@@ -75,10 +75,19 @@ export class UserController {
 
   @Post('/')
   async createUser(@Body() user: CreateUserDto): Promise<UserInfoDto> {
-    const currentUser = await this.userService.findUserBy({ OR: [{ userName: user.userName }, { email: user.email }] });
-    
-    if (currentUser) throw new HttpException('User already exists', HttpStatus.CONFLICT);
-    
+    let currentUser = await this.userService.findUserBy({ userName: user.userName });
+
+    if (currentUser)
+      throw new HttpException(
+        { statusCode: 409, message: 'User already exists', error: 'userName' },
+        HttpStatus.CONFLICT
+      );
+
+    currentUser = await this.userService.findUserBy({ email: user.email });
+
+    if (currentUser)
+      throw new HttpException({ statusCode: 409, message: 'User already exists', error: 'email' }, HttpStatus.CONFLICT);
+
     return this.userService.createUser(user);
   }
 
