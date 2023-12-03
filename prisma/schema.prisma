@@ -23,5 +23,56 @@ model User {
 
   password String
 
+  friends User[] @relation("friends")
+
+  friendsOf User[] @relation("friends")
+
+  messages Message[]
+
+  channels UserInChannel[]
+
   @@map("users")
 }
+
+model UserInChannel {
+  user User @relation(fields: [userId], references: [id])
+
+  userId Int
+
+  channel Channel @relation(fields: [channelId], references: [id])
+
+  channelId Int
+
+  @@id([userId, channelId])
+}
+
+model Channel {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  participants UserInChannel[]
+
+  messages Message[]
+
+  @@map("channels")
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+
+  text String
+
+  user User @relation(fields: [userId], references: [id])
+
+  userId Int
+
+  channel Channel @relation(fields: [channelId], references: [id])
+
+  channelId Int
+
+  createdAt DateTime @default(now())
+
+  @@map("messages")
+}
+
