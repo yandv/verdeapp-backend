@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { SignInUserDto, UserInfoDto } from 'src/model/users/user.dto';
@@ -16,7 +16,7 @@ export class AuthService {
     const { user: userId, password: userPass } = signInUserDto;
     const user: User = await this.userService.findUserBy({ OR: [{ userName: userId }, { email: userId }] });
 
-    if (!user) throw new UnauthorizedException();
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
 
     const authenticated: boolean = await EncryptionUtils.compare(userPass, user?.password);
 
