@@ -1,5 +1,8 @@
+import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
+import { JWT_TOKEN } from 'src/utils/constants';
+import { parseAuth } from 'src/utils/string';
 
 class ConnectedSocket {
   socket: Socket;
@@ -14,13 +17,29 @@ function toString(socket: ConnectedSocket): string {
 export class MessageService {
   private readonly clients: Map<string, ConnectedSocket> = new Map();
 
-  handleConnection(socket: Socket): void {
+  constructor(private readonly jwtService: JwtService) {}
+
+  async handleConnection(socket: Socket): Promise<void> {
     const clientId = socket.id;
-    const authorization = socket.handshake.headers.authorization;
+    const authorization = parseAuth(socket.handshake.headers.authorization);
 
     if (!authorization) {
       socket.disconnect();
       console.log(`The client ${clientId} tried to connect without authorization.`);
+      return;
+    }
+
+    let userId: number;
+    console.log(authorization);
+
+    try {
+      const payload = await this.jwtService.verifyAsync(authorization, {
+        secret: JWT_TOKEN,
+      });
+      userId = payload.userId;
+    } catch {
+      socket.disconnect();
+      console.log(`The client ${clientId} tried to connect with an invalid token.`);
       return;
     }
 

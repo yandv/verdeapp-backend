@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { SignInUserDto } from 'src/model/users/user.dto';
 import User from 'src/model/users/user.entity';
+import EncryptionUtils from 'src/utils/encryption.utils';
 
 @Injectable()
 export class AuthService {
@@ -12,16 +13,19 @@ export class AuthService {
   ) {}
 
   async signInUser(signInUserDto: SignInUserDto): Promise<{ accessToken: string }> {
-    const { email, userName, passWord } = signInUserDto;
-    const user: User = await this.userService.findUserBy({ OR: { email, userName } });
+    const { user: userId, passWord } = signInUserDto;
+    const user: User = await this.userService.findUserBy({ OR: [{ userName: userId }, { email: userId }] });
 
-    if (user?.password !== passWord) throw new UnauthorizedException();
+    if (!user) throw new UnauthorizedException();
+
+    const authenticated: boolean = await EncryptionUtils.compare(passWord, user?.password);
+
+    if (!authenticated) throw new UnauthorizedException()
 
     const { password, ...result } = user;
     const payload = { userId: result.id, userName: result.userName, email: result.email };
+    const accessToken = await this.jwtService.signAsync(payload);
 
-    return {
-      accessToken: await this.jwtService.signAsync(payload),
-    };
+    return { accessToken };
   }
 }
