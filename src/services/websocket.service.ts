@@ -14,7 +14,7 @@ function toString(socket: ConnectedSocket): string {
 }
 
 @Injectable()
-export class MessageService {
+export class WebsocketService {
   private readonly clients: Map<string, ConnectedSocket> = new Map();
 
   constructor(private readonly jwtService: JwtService) {}
@@ -64,5 +64,9 @@ export class MessageService {
     }
 
     socket.emit('message', message);
+  }
+
+  isUserOnline(userId: number): boolean {
+    return Array.from(this.clients.values()).some((socket) => socket.userId === userId);
   }
 }

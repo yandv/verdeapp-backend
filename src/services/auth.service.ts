@@ -13,12 +13,12 @@ export class AuthService {
   ) {}
 
   async signInUser(signInUserDto: SignInUserDto): Promise<{ accessToken: string }> {
-    const { user: userId, passWord } = signInUserDto;
+    const { user: userId, password: userPass } = signInUserDto;
     const user: User = await this.userService.findUserBy({ OR: [{ userName: userId }, { email: userId }] });
 
     if (!user) throw new UnauthorizedException();
 
-    const authenticated: boolean = await EncryptionUtils.compare(passWord, user?.password);
+    const authenticated: boolean = await EncryptionUtils.compare(userPass, user?.password);
 
     if (!authenticated) throw new UnauthorizedException()
 
