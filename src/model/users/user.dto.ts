@@ -6,16 +6,31 @@ export interface UserInfoDto {
   email: string;
   userName: string;
   bio?: string;
+  imageUrl?: string;
 }
 
 export class CreateUserDto extends createZodDto(
   z.object({
     email: z.string().email(),
     userName: z.string().min(4).max(50),
-    passWord: z
-      .string()
-      .min(8),
+    passWord: z.string().min(8),
   })
+) {}
+
+export class UpdateUserDto extends createZodDto(
+  z
+    .object({
+      email: z.string().email().optional(),
+      userName: z.string().min(4).max(50).optional(),
+      bio: z.string().optional(),
+      imageUrl: z.string().url().optional(),
+    })
+    .refine(
+      (data) => {
+        return !data.email && !data.userName && !data.bio && !data.imageUrl;
+      },
+      { message: 'At least one field must be provided' }
+    )
 ) {}
 
 export class SignInUserDto extends createZodDto(
