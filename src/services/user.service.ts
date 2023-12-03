@@ -26,7 +26,7 @@ export class UserService {
       data: {
         userName: createUserDto.userName,
         email: createUserDto.email.toLowerCase(),
-        password: await EncryptionUtils.encrypt(createUserDto.passWord),
+        password: await EncryptionUtils.encrypt(createUserDto.password),
         bio: DEFAULT_BIO_TEXT,
         imageUrl: DEFAULT_IMAGE_URL,
       },

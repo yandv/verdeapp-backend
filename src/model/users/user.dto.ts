@@ -13,7 +13,7 @@ export class CreateUserDto extends createZodDto(
   z.object({
     email: z.string().email(),
     userName: z.string().min(4).max(50),
-    passWord: z.string().min(8),
+    password: z.string().min(8),
   })
 ) {}
 
