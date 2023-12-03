@@ -2,11 +2,11 @@ import { Controller, Get, Post, Body, Put, Param, HttpStatus, HttpException } fr
 import { UserService } from '../services/user.service';
 import User from 'src/model/users/user.entity';
 
-@Controller()
+@Controller('/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('/users')
+  @Get('/')
   async retrieveUsers(): Promise<any> {
     const users = await this.userService.getUsers();
 
@@ -15,12 +15,12 @@ export class UserController {
     throw new HttpException('No users found', HttpStatus.NOT_FOUND);
   }
 
-  @Post('/users')
+  @Post('/')
   createUser(@Body() user: User): Promise<User> {
     return this.userService.createUser(user);
   }
 
-  @Put('/users/:id')
+  @Put('/:id')
   updateUser(@Param('id') id: number, @Body() user: User): Promise<User> {
     return this.userService.updateUser({
       where: { id },

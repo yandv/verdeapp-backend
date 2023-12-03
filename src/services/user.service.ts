@@ -12,6 +12,12 @@ export class UserService {
     });
   }
 
+  public async findUserBy(params: any): Promise<User> {
+    return this.prisma.user.findFirst({
+      where: params,
+    });
+  }
+
   public async createUser(data: any) {
     return this.prisma.user.create({
       data,
