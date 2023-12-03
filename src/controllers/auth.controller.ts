@@ -11,7 +11,7 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async authUser(@Body() signInUserDto: SignInUserDto): Promise<{ accessToken: string }> {
+  async authUser(@Body() signInUserDto: SignInUserDto): Promise<{ token: string; user: UserInfoDto }> {
     return await this.authService.signInUser(signInUserDto);
   }
 
@@ -19,6 +19,6 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Get('profile')
   async profile(@Request() req): Promise<UserInfoDto> {
-    return req.user
+    return req.user;
   }
 }

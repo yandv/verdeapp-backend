@@ -12,7 +12,7 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  async signInUser(signInUserDto: SignInUserDto): Promise<{ accessToken: string }> {
+  async signInUser(signInUserDto: SignInUserDto): Promise<{ token: string; user: UserInfoDto }> {
     const { user: userId, password: userPass } = signInUserDto;
     const user: User = await this.userService.findUserBy({ OR: [{ userName: userId }, { email: userId }] });
 
@@ -20,13 +20,13 @@ export class AuthService {
 
     const authenticated: boolean = await EncryptionUtils.compare(userPass, user?.password);
 
-    if (!authenticated) throw new UnauthorizedException()
+    if (!authenticated) throw new UnauthorizedException();
 
     const { password, ...result } = user;
     const payload = { userId: result.id, userName: result.userName, email: result.email };
-    const accessToken = await this.jwtService.signAsync(payload);
+    const token = await this.jwtService.signAsync(payload);
 
-    return { accessToken };
+    return { token, user: result };
   }
 
   async validateToken(token: string): Promise<UserInfoDto> {
@@ -34,8 +34,6 @@ export class AuthService {
     const user: User = await this.userService.findUserBy({ id: userId });
 
     if (!user) throw new UnauthorizedException();
-
-    if (user.userName !== userName || user.email !== email) throw new UnauthorizedException();
 
     const { password, ...result } = user;
     return result;
