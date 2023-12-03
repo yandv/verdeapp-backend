@@ -1,22 +1,28 @@
-import { WebSocketGateway, SubscribeMessage, WebSocketServer, OnGatewayConnection } from "@nestjs/websockets";
-import { Server, Socket } from "socket.io";
-import { WebsocketService } from "src/services/websocket.service";
+import { WebSocketGateway, SubscribeMessage, WebSocketServer, OnGatewayConnection } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { messageSchema } from 'src/model/message/message.dto';
+import { WebsocketService } from 'src/services/websocket.service';
 
-@WebSocketGateway({namespace: 'chat', cors: true})
+@WebSocketGateway({ namespace: 'chat', cors: true })
 export class WebsocketGateway implements OnGatewayConnection {
+  @WebSocketServer()
+  private server: Server;
 
-    @WebSocketServer()
-    private server: Server;
+  constructor(private readonly websocketService: WebsocketService) {}
 
-    constructor(private readonly websocketService: WebsocketService) { }
+  handleConnection(socket: Socket): void {
+    this.websocketService.handleConnection(socket);
+  }
 
-    handleConnection(socket: Socket): void {
-        this.websocketService.handleConnection(socket);
+  @SubscribeMessage('message')
+  handleMessage(socket: Socket, message: string) {
+    const valid = messageSchema.safeParse(message);
+
+    if (!valid.success) {
+      console.log('Invalid message received: ', message);
+      return;
     }
     
-    @SubscribeMessage('message')
-    handleMessage(socket: Socket, message: string) {
-        this.websocketService.handleReceiveMessage(socket, message);
-    }
-
+    this.websocketService.handleReceiveMessage(socket, message);
+  }
 }

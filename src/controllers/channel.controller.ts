@@ -13,7 +13,7 @@ import {
   Delete,
   Request,
 } from '@nestjs/common';
-import { ZodValidationPipe, createZodValidationPipe } from 'nestjs-zod';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { ChannelService } from 'src/services/channel.service';
 import { AuthGuard } from 'src/security/auth.guard';
 import { CreateChannelDto } from 'src/model/channel/channel.dto';

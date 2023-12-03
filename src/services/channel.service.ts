@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { CreateChannelDto } from 'src/model/channel/channel.dto';
-import { UserInfoDto } from 'src/model/users/user.dto';
-import { Channel } from 'src/model/channel/channel.entity';
 
 @Injectable()
 export class ChannelService {

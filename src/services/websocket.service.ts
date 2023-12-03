@@ -1,12 +1,13 @@
-import { JwtService } from '@nestjs/jwt';
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
-import { JWT_TOKEN } from 'src/utils/constants';
 import { parseAuth } from 'src/utils/string';
+import { AuthService } from './auth.service';
+import { UserInfoDto } from 'src/model/users/user.dto';
 
 class ConnectedSocket {
   socket: Socket;
   userId: number;
+  avatarUrl: string;
 }
 
 function toString(socket: ConnectedSocket): string {
@@ -17,7 +18,7 @@ function toString(socket: ConnectedSocket): string {
 export class WebsocketService {
   private readonly clients: Map<string, ConnectedSocket> = new Map();
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly authService: AuthService) {}
 
   async handleConnection(socket: Socket): Promise<void> {
     const clientId = socket.id;
@@ -29,21 +30,18 @@ export class WebsocketService {
       return;
     }
 
-    let userId: number;
+    let user: UserInfoDto;
     console.log(authorization);
 
     try {
-      const payload = await this.jwtService.verifyAsync(authorization, {
-        secret: JWT_TOKEN,
-      });
-      userId = payload.userId;
+      user = await this.authService.validateToken(authorization);
     } catch {
       socket.disconnect();
       console.log(`The client ${clientId} tried to connect with an invalid token.`);
       return;
     }
 
-    const connectedSocket = { socket, userId: 1 };
+    const connectedSocket = { socket, userId: user.id, avatarUrl: user.imageUrl };
     this.clients.set(clientId, connectedSocket);
 
     console.log(`The client ${toString(connectedSocket)} has been connected successfully.`);
@@ -58,12 +56,13 @@ export class WebsocketService {
   handleReceiveMessage(socket: Socket, message: string): void {
     const connectedSocket = this.clients.get(socket.id);
 
-    if (!socket) {
+    if (!connectedSocket) {
       console.log(`The client ${toString(connectedSocket)} is not connected.`);
       return;
     }
 
-    socket.emit('message', message);
+    const { userId: authorId, avatarUrl } = connectedSocket;
+    socket.broadcast.emit('message', { authorId, avatarUrl, message });
   }
 
   isUserOnline(userId: number): boolean {

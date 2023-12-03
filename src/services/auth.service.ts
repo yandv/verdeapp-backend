@@ -35,6 +35,8 @@ export class AuthService {
 
     if (!user) throw new UnauthorizedException();
 
+    if (user.userName !== userName || user.email !== email) throw new UnauthorizedException();
+
     const { password, ...result } = user;
     return result;
   }
