@@ -36,6 +36,6 @@ export class UpdateUserDto extends createZodDto(
 export class SignInUserDto extends createZodDto(
   z.object({
     user: z.union([z.string().min(4).max(50), z.string().email()]),
-    passWord: z.string(),
+    password: z.string(),
   })
 ) {}
